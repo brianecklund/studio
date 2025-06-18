@@ -1,3 +1,4 @@
+
 import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -9,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Layers3 } from 'lucide-react';
+import { Layers3, UserCog } from 'lucide-react';
 
 export default function AppHeader() {
   return (
@@ -20,9 +21,15 @@ export default function AppHeader() {
           <span className="font-headline text-2xl font-semibold text-primary">Brand Hub</span>
         </Link>
         <div className="flex items-center gap-4">
-          <nav className="hidden md:flex gap-4">
+          <nav className="hidden md:flex gap-2">
             <Button variant="ghost" asChild>
               <Link href="/dashboard">Dashboard</Link>
+            </Button>
+            <Button variant="ghost" asChild>
+              <Link href="/admin/dashboard">
+                <UserCog className="mr-2 h-4 w-4" />
+                Admin
+              </Link>
             </Button>
             {/* Add more navigation links here if needed */}
           </nav>
@@ -57,6 +64,25 @@ export default function AppHeader() {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+           {/* Mobile Menu Trigger (example, full implementation might need more) */}
+           <div className="md:hidden">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5"><line x1="4" x2="20" y1="12" y2="12"></line><line x1="4" x2="20" y1="6" y2="6"></line><line x1="4" x2="20" y1="18" y2="18"></line></svg>
+                  <span className="sr-only">Toggle menu</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem asChild>
+                  <Link href="/dashboard">Dashboard</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/admin/dashboard">Admin</Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </div>
     </header>
