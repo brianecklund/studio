@@ -5,38 +5,7 @@ import { ArrowLeft, Edit, UploadCloud, Briefcase, Building } from 'lucide-react'
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import AssetViewer from '@/components/dashboard/asset-viewer';
-import type { Asset } from '@/lib/types';
-
-// Mock data - in a real app, this would come from a database or API
-const mockClientAssets: Record<string, { clientName: string; industry: string; logoUrl?: string; dataAiHint?: string; assets: Asset[] }> = {
-  'bk001': {
-    clientName: 'Innovatech Corp',
-    industry: 'Technology',
-    logoUrl: 'https://placehold.co/80x80.png',
-    dataAiHint: 'tech logo',
-    assets: [
-      { id: 'inno-1', name: 'Innovatech Primary Logo', type: 'image', path: '/Logos/', status: 'completed', needsAttention: false, lastModified: '2023-10-26T10:00:00Z', size: '1.2 MB', previewUrl: 'https://placehold.co/100x100.png', dataAiHint: 'abstract tech', downloadUrl: '#', createdAt: '2023-01-15T00:00:00Z' },
-      { id: 'inno-2', name: 'Innovatech Brand Guidelines', type: 'pdf', path: '/', status: 'completed', needsAttention: false, lastModified: '2023-11-15T14:30:00Z', size: '5.5 MB', downloadUrl: '#', createdAt: '2023-01-20T00:00:00Z' },
-      { id: 'inno-3', name: 'Innovatech Product One-Pager', type: 'document', path: '/Marketing Materials/', status: 'in-progress', needsAttention: true, lastModified: '2023-12-01T09:15:00Z', size: '2.1 MB', downloadUrl: '#', createdAt: '2023-10-01T00:00:00Z' },
-    ],
-  },
-  'bk002': {
-    clientName: 'EcoSolutions Ltd.',
-    industry: 'Sustainability',
-    logoUrl: 'https://placehold.co/80x80.png',
-    dataAiHint: 'nature logo',
-    assets: [
-      { id: 'eco-1', name: 'EcoSolutions Leaf Logo', type: 'image', path: '/Logos/', status: 'completed', needsAttention: false, lastModified: '2023-11-05T10:00:00Z', size: '900 KB', previewUrl: 'https://placehold.co/100x100.png', dataAiHint: 'leaf environment', downloadUrl: '#', createdAt: '2023-02-15T00:00:00Z' },
-      { id: 'eco-2', name: 'Sustainability Report 2023', type: 'pdf', path: '/Reports/', status: 'completed', needsAttention: false, lastModified: '2023-11-20T14:30:00Z', size: '10.2 MB', downloadUrl: '#', createdAt: '2023-02-20T00:00:00Z' },
-    ],
-  },
-  // Add more mock clients as needed, copying the structure from AdminDashboardPage
-  'bk003': { clientName: 'HealthBridge Inc.', industry: 'Healthcare', logoUrl: 'https://placehold.co/80x80.png', dataAiHint: 'medical cross', assets: [] },
-  'bk004': { clientName: 'QuantumLeap AI', industry: 'Artificial Intelligence', logoUrl: 'https://placehold.co/80x80.png', dataAiHint: 'abstract brain', assets: [] },
-  'bk005': { clientName: 'Artisan Foods Co.', industry: 'Food & Beverage', logoUrl: 'https://placehold.co/80x80.png', dataAiHint: 'wheat grain', assets: [] },
-  'bk006': { clientName: 'Globetrotter Agency', industry: 'Travel', logoUrl: 'https://placehold.co/80x80.png', dataAiHint: 'globe compass', assets: [] },
-};
-
+import { mockClientAssets } from '@/lib/mock-data'; // Import centralized mock data
 
 export default function AdminBrandKitDetailPage({ params }: { params: { kitId: string } }) {
   const kitDetails = mockClientAssets[params.kitId];

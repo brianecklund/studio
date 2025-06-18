@@ -1,3 +1,4 @@
+
 export type AssetStatus = "waiting" | "in-progress" | "completed";
 export type AssetType = "folder" | "pdf" | "image" | "video" | "document" | "archive" | "other";
 
@@ -14,6 +15,7 @@ export interface Asset {
   previewUrl?: string; // only for files, e.g. image preview
   children?: Asset[]; // For folders
   createdAt: string; // ISO date string
+  dataAiHint?: string; // Added for consistency, though not used everywhere yet
 }
 
 export interface Client {
@@ -53,4 +55,15 @@ export interface AISuggestion {
   assetName: string;
   reasoning: string;
   category?: string;
+}
+
+// For Admin Attention Items Overlay
+export interface AttentionItem {
+  assetId: string;
+  assetName: string;
+  assetType: AssetType;
+  clientName: string;
+  clientId: string; // This is the kitId
+  lastModified: string;
+  // Potentially add 'requestSummary' or link to specific request if that data exists
 }
