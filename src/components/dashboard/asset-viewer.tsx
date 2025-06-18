@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { useState } from 'react';
 import RequestUpdateForm from './request-update-form';
 import { format } from 'date-fns';
+import { cn } from "@/lib/utils"; // Added this import
 
 interface AssetViewerProps {
   assets: Asset[];
