@@ -3,7 +3,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Users, Briefcase, Eye } from 'lucide-react';
+import { Users, Briefcase, Eye, FolderKanban, FileText, AlertCircle } from 'lucide-react';
 
 interface AdminBrandKitPreview {
   kitId: string;
@@ -12,15 +12,16 @@ interface AdminBrandKitPreview {
   logoUrl?: string;
   dataAiHint?: string;
   industry?: string;
+  hasAttentionItems: boolean; // New field for attention indicator
 }
 
 const mockAdminBrandKits: AdminBrandKitPreview[] = [
-  { kitId: 'bk001', clientName: 'Innovatech Corp', assetCount: 15, logoUrl: 'https://placehold.co/80x80.png', dataAiHint: 'tech logo', industry: 'Technology' },
-  { kitId: 'bk002', clientName: 'EcoSolutions Ltd.', assetCount: 22, logoUrl: 'https://placehold.co/80x80.png', dataAiHint: 'nature logo', industry: 'Sustainability' },
-  { kitId: 'bk003', clientName: 'HealthBridge Inc.', assetCount: 8, logoUrl: 'https://placehold.co/80x80.png', dataAiHint: 'medical logo', industry: 'Healthcare' },
-  { kitId: 'bk004', clientName: 'QuantumLeap AI', assetCount: 30, logoUrl: 'https://placehold.co/80x80.png', dataAiHint: 'abstract logo', industry: 'Artificial Intelligence' },
-  { kitId: 'bk005', clientName: 'Artisan Foods Co.', assetCount: 12, logoUrl: 'https://placehold.co/80x80.png', dataAiHint: 'food logo', industry: 'Food & Beverage' },
-  { kitId: 'bk006', clientName: 'Globetrotter Agency', assetCount: 18, logoUrl: 'https://placehold.co/80x80.png', dataAiHint: 'travel logo', industry: 'Travel' },
+  { kitId: 'bk001', clientName: 'Innovatech Corp', assetCount: 15, logoUrl: 'https://placehold.co/80x80.png', dataAiHint: 'tech logo', industry: 'Technology', hasAttentionItems: true },
+  { kitId: 'bk002', clientName: 'EcoSolutions Ltd.', assetCount: 22, logoUrl: 'https://placehold.co/80x80.png', dataAiHint: 'nature logo', industry: 'Sustainability', hasAttentionItems: false },
+  { kitId: 'bk003', clientName: 'HealthBridge Inc.', assetCount: 8, logoUrl: 'https://placehold.co/80x80.png', dataAiHint: 'medical logo', industry: 'Healthcare', hasAttentionItems: true },
+  { kitId: 'bk004', clientName: 'QuantumLeap AI', assetCount: 30, logoUrl: 'https://placehold.co/80x80.png', dataAiHint: 'abstract logo', industry: 'Artificial Intelligence', hasAttentionItems: false },
+  { kitId: 'bk005', clientName: 'Artisan Foods Co.', assetCount: 12, logoUrl: 'https://placehold.co/80x80.png', dataAiHint: 'food logo', industry: 'Food & Beverage', hasAttentionItems: false },
+  { kitId: 'bk006', clientName: 'Globetrotter Agency', assetCount: 18, logoUrl: 'https://placehold.co/80x80.png', dataAiHint: 'travel logo', industry: 'Travel', hasAttentionItems: true },
 ];
 
 export default function AdminDashboardPage() {
@@ -39,7 +40,13 @@ export default function AdminDashboardPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {mockAdminBrandKits.map((kit) => (
-          <Card key={kit.kitId} className="flex flex-col hover:shadow-lg transition-shadow duration-200">
+          <Card key={kit.kitId} className="flex flex-col hover:shadow-lg transition-shadow duration-200 relative">
+            {kit.hasAttentionItems && (
+              <div className="absolute top-3 right-3 text-destructive z-10" title="Items need attention">
+                <AlertCircle className="h-5 w-5" />
+                <span className="sr-only">Needs attention</span>
+              </div>
+            )}
             <CardHeader className="flex flex-row items-start gap-4 space-y-0">
               {kit.logoUrl && (
                 <Image
@@ -62,8 +69,18 @@ export default function AdminDashboardPage() {
                 {kit.assetCount} assets in kit
               </div>
             </CardContent>
-            <CardFooter>
-              <Button asChild className="w-full">
+            <CardFooter className="flex flex-col sm:flex-row gap-2 pt-4">
+              <Button asChild className="flex-1" variant="outline">
+                <Link href={`/admin/client/${kit.kitId}/projects`}>
+                  <FolderKanban className="mr-2 h-4 w-4" /> Projects
+                </Link>
+              </Button>
+              <Button asChild className="flex-1" variant="outline">
+                <Link href={`/admin/client/${kit.kitId}/documents`}>
+                  <FileText className="mr-2 h-4 w-4" /> Documents
+                </Link>
+              </Button>
+              <Button asChild className="flex-1">
                 <Link href={`/admin/brand-kit/${kit.kitId}`}>
                   <Eye className="mr-2 h-4 w-4" /> View Kit
                 </Link>
