@@ -4,66 +4,35 @@ import Image from 'next/image';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Users, Briefcase, Eye, FolderKanban, FileText, AlertCircle, BellRing } from 'lucide-react';
-import { mockClientAssets } from '@/lib/mock-data'; // Import centralized mock data
-import type { Asset, AttentionItem } from '@/lib/types';
-import AttentionItemsOverlay from '@/components/admin/attention-items-overlay';
+import { client as sanityClient, urlForImage } from '@/lib/sanity/client';
+import type { Client } from '@/lib/types';
+// AttentionItemsOverlay and related logic removed for now to simplify Sanity integration.
+// It can be added back with optimized queries.
 
-
-interface AdminBrandKitPreview {
-  kitId: string;
-  clientName: string;
-  assetCount: number;
-  logoUrl?: string;
-  dataAiHint?: string;
-  industry?: string;
-  hasAttentionItems: boolean;
+// Fetch clients from Sanity
+async function getClients(): Promise<Client[]> {
+  const query = `*[_type == "client"]{
+    _id,
+    _type,
+    name,
+    slug,
+    industry,
+    logo,
+    clientEmail,
+    status,
+    "assetCount": count(*[_type == "asset" && references(^._id)])
+  }`;
+  const clients = await sanityClient.fetch<Client[]>(query);
+  return clients;
 }
 
-// This mock data could also be moved to mock-data.ts if it grows more complex
-// For now, it's fine here as it's specific to this page's preview cards.
-const mockAdminBrandKits: AdminBrandKitPreview[] = [
-  { kitId: 'bk001', clientName: 'Innovatech Corp', assetCount: mockClientAssets['bk001']?.assets.length || 0, logoUrl: 'https://placehold.co/80x80.png', dataAiHint: 'tech logo', industry: 'Technology', hasAttentionItems: mockClientAssets['bk001']?.assets.some(a => a.needsAttention) || false },
-  { kitId: 'bk002', clientName: 'EcoSolutions Ltd.', assetCount: mockClientAssets['bk002']?.assets.length || 0, logoUrl: 'https://placehold.co/80x80.png', dataAiHint: 'nature logo', industry: 'Sustainability', hasAttentionItems: mockClientAssets['bk002']?.assets.some(a => a.needsAttention) || false },
-  { kitId: 'bk003', clientName: 'HealthBridge Inc.', assetCount: mockClientAssets['bk003']?.assets.length || 0, logoUrl: 'https://placehold.co/80x80.png', dataAiHint: 'medical logo', industry: 'Healthcare', hasAttentionItems: mockClientAssets['bk003']?.assets.some(a => a.needsAttention) || false },
-  { kitId: 'bk004', clientName: 'QuantumLeap AI', assetCount: mockClientAssets['bk004']?.assets.length || 0, logoUrl: 'https://placehold.co/80x80.png', dataAiHint: 'abstract logo', industry: 'Artificial Intelligence', hasAttentionItems: mockClientAssets['bk004']?.assets.some(a => a.needsAttention) || false },
-  { kitId: 'bk005', clientName: 'Artisan Foods Co.', assetCount: mockClientAssets['bk005']?.assets.length || 0, logoUrl: 'https://placehold.co/80x80.png', dataAiHint: 'food logo', industry: 'Food & Beverage', hasAttentionItems: mockClientAssets['bk005']?.assets.some(a => a.needsAttention) || false },
-  { kitId: 'bk006', clientName: 'Globetrotter Agency', assetCount: mockClientAssets['bk006']?.assets.length || 0, logoUrl: 'https://placehold.co/80x80.png', dataAiHint: 'travel logo', industry: 'Travel', hasAttentionItems: mockClientAssets['bk006']?.assets.some(a => a.needsAttention) || false },
-];
+export default async function AdminDashboardPage() {
+  const clients = await getClients();
 
-function getAllAttentionItems(kits: AdminBrandKitPreview[]): AttentionItem[] {
-  const attentionItems: AttentionItem[] = [];
-
-  const collectAttentionItemsFromAssets = (assets: Asset[], clientName: string, clientId: string) => {
-    for (const asset of assets) {
-      if (asset.needsAttention) {
-        attentionItems.push({
-          assetId: asset.id,
-          assetName: asset.name,
-          assetType: asset.type,
-          clientName: clientName,
-          clientId: clientId,
-          lastModified: asset.lastModified,
-        });
-      }
-      if (asset.children && asset.children.length > 0) {
-        collectAttentionItemsFromAssets(asset.children, clientName, clientId);
-      }
-    }
-  };
-
-  kits.forEach(kitPreview => {
-    const clientData = mockClientAssets[kitPreview.kitId];
-    if (clientData && clientData.assets) {
-      collectAttentionItemsFromAssets(clientData.assets, clientData.clientName, kitPreview.kitId);
-    }
-  });
-  return attentionItems;
-}
-
-
-export default function AdminDashboardPage() {
-  const attentionItems = getAllAttentionItems(mockAdminBrandKits);
-  const attentionCount = attentionItems.length;
+  // Note: AttentionItemsOverlay and its data fetching logic (getAllAttentionItems)
+  // have been removed for this iteration to focus on core Sanity client data display.
+  // Re-integrating it would require fetching and processing asset attention status across all clients.
+  // const attentionCount = 0; // Placeholder
 
   return (
     <div className="space-y-8">
@@ -77,71 +46,85 @@ export default function AdminDashboardPage() {
             Manage and oversee all client brand kits from this central hub.
           </p>
         </div>
+        {/* Placeholder for re-adding AttentionItemsOverlay if needed in the future
         {attentionCount > 0 && (
-           <AttentionItemsOverlay
-            items={attentionItems}
-            triggerButton={
-              <Button variant="outline" className="bg-destructive/10 text-destructive hover:bg-destructive/20 hover:text-destructive border-destructive/30">
-                <BellRing className="mr-2 h-4 w-4" />
-                {attentionCount} {attentionCount === 1 ? "Item Needs" : "Items Need"} Attention
-              </Button>
-            }
-          />
+           <Button variant="outline" className="bg-destructive/10 text-destructive hover:bg-destructive/20 hover:text-destructive border-destructive/30">
+             <BellRing className="mr-2 h-4 w-4" />
+             {attentionCount} {attentionCount === 1 ? "Item Needs" : "Items Need"} Attention
+           </Button>
         )}
+        */}
       </div>
       
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {mockAdminBrandKits.map((kit) => (
-          <Card key={kit.kitId} className="flex flex-col hover:shadow-lg transition-shadow duration-200 relative">
-            {kit.hasAttentionItems && (
+        {clients.map((clientAccount) => (
+          <Card key={clientAccount._id} className="flex flex-col hover:shadow-lg transition-shadow duration-200 relative">
+            {/* 
+              Logic for 'hasAttentionItems' needs to be re-evaluated with Sanity.
+              It would require querying assets for this client and checking 'needsAttention'.
+              For now, this is removed.
+            */}
+            {/* {clientAccount.hasAttentionItems && (
               <div className="absolute top-3 right-3 text-destructive z-10" title="Items need attention">
                 <AlertCircle className="h-5 w-5" />
                 <span className="sr-only">Needs attention</span>
               </div>
-            )}
+            )} */}
             <CardHeader className="flex flex-row items-start gap-4 space-y-0">
-              {kit.logoUrl && (
+              {clientAccount.logo && (
                 <Image
-                  src={kit.logoUrl}
-                  alt={`${kit.clientName} logo`}
+                  // @ts-ignore // Temp ignore for SanityImageObject vs string
+                  src={urlForImage(clientAccount.logo).width(60).height(60).url()}
+                  alt={`${clientAccount.name || 'Client'} logo`}
                   width={60}
                   height={60}
                   className="rounded-md border"
-                  data-ai-hint={kit.dataAiHint || "company logo"}
+                  data-ai-hint={`${clientAccount.industry || 'company'} logo`}
                 />
               )}
               <div className="flex-1">
-                <CardTitle className="font-headline text-xl">{kit.clientName}</CardTitle>
-                {kit.industry && <CardDescription>{kit.industry}</CardDescription>}
+                <CardTitle className="font-headline text-xl">{clientAccount.name || 'Unnamed Client'}</CardTitle>
+                {clientAccount.industry && <CardDescription>{clientAccount.industry}</CardDescription>}
               </div>
             </CardHeader>
             <CardContent className="flex-grow">
               <div className="flex items-center text-sm text-muted-foreground">
                 <Briefcase className="mr-2 h-4 w-4" />
-                {kit.assetCount} assets in kit
+                {clientAccount.assetCount || 0} assets in kit
               </div>
+               <p className="text-xs text-muted-foreground mt-1">Status: {clientAccount.status || 'N/A'}</p>
+               <p className="text-xs text-muted-foreground mt-1">Email: {clientAccount.clientEmail || 'N/A'}</p>
             </CardContent>
             <CardFooter className="flex flex-col sm:flex-row gap-2 pt-4">
-              <Button asChild className="flex-1" variant="outline">
-                <Link href={`/admin/client/${kit.kitId}/projects`}>
-                  <FolderKanban className="mr-2 h-4 w-4" /> Projects
-                </Link>
+              <Button asChild className="flex-1" variant="outline" disabled>
+                {/* <Link href={`/admin/client/${clientAccount.slug?.current || clientAccount._id}/projects`}> */}
+                  <FolderKanban className="mr-2 h-4 w-4" /> Projects (Soon)
+                {/* </Link> */}
               </Button>
-              <Button asChild className="flex-1" variant="outline">
-                <Link href={`/admin/client/${kit.kitId}/documents`}>
-                  <FileText className="mr-2 h-4 w-4" /> Documents
-                </Link>
+              <Button asChild className="flex-1" variant="outline" disabled>
+                {/* <Link href={`/admin/client/${clientAccount.slug?.current || clientAccount._id}/documents`}> */}
+                  <FileText className="mr-2 h-4 w-4" /> Documents (Soon)
+                {/* </Link> */}
               </Button>
               <Button asChild className="flex-1">
-                <Link href={`/admin/brand-kit/${kit.kitId}`}>
+                <Link href={`/admin/brand-kit/${clientAccount.slug?.current || clientAccount._id}`}>
                   <Eye className="mr-2 h-4 w-4" /> View Kit
                 </Link>
               </Button>
             </CardFooter>
           </Card>
         ))}
+        {clients.length === 0 && (
+          <p className="col-span-full text-center text-muted-foreground py-10">
+            No clients found. Add clients in the Sanity Studio.
+          </p>
+        )}
       </div>
     </div>
   );
 }
+
+// Ensure dynamic rendering for server components that fetch data
+export const dynamic = 'force-dynamic';
+export const revalidate = 0; // Prevent caching, always fetch fresh data

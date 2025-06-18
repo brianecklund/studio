@@ -16,37 +16,46 @@ import { cn } from "@/lib/utils";
 
 interface AssetViewerProps {
   assets: Asset[];
-  onUpdateRequestSubmit: (assetId: string, requestData: ClientSubmittedRequest) => void;
+  onUpdateRequestSubmit?: (assetId: string, requestData: ClientSubmittedRequest) => void; // Optional for admin view
   onAttentionIconClick?: (asset: Asset) => void; // For admin: opens attention details modal
   onViewVersionsClick?: (asset: Asset) => void;  // For admin: opens versions history modal
 }
 
-// Helper component to format date on client-side to avoid hydration mismatch
-const ClientSideFormattedDate: FC<{ dateString: string; formatPattern: string }> = ({ dateString, formatPattern }) => {
+const ClientSideFormattedDate: FC<{ dateString?: string; formatPattern: string }> = ({ dateString, formatPattern }) => {
   const [formattedDate, setFormattedDate] = useState<string | null>(null);
 
   useEffect(() => {
-    setFormattedDate(format(new Date(dateString), formatPattern));
+    if (dateString) {
+      try {
+        setFormattedDate(format(new Date(dateString), formatPattern));
+      } catch (e) {
+        console.error("Error formatting date:", dateString, e);
+        setFormattedDate("Invalid Date");
+      }
+    } else {
+      setFormattedDate("N/A");
+    }
   }, [dateString, formatPattern]);
 
   return <>{formattedDate || '...'}</>;
 };
 
 
-const getStatusBadgeVariant = (status: AssetStatus): 'default' | 'secondary' | 'destructive' | 'outline' => {
+const getStatusBadgeVariant = (status?: AssetStatus): 'default' | 'secondary' | 'destructive' | 'outline' => {
   switch (status) {
     case 'completed':
       return 'default';
     case 'in-progress':
       return 'secondary';
     case 'waiting':
-      return 'outline';
+      return 'outline'; // Or destructive if it implies an issue
     default:
       return 'outline';
   }
 };
 
-const getStatusBadgeClassName = (status: AssetStatus): string => {
+const getStatusBadgeClassName = (status?: AssetStatus): string => {
+  if (!status) return 'bg-gray-100 text-gray-800 border-gray-300';
   switch (status) {
     case 'completed':
       return 'bg-green-100 text-green-800 border-green-300';
@@ -99,6 +108,7 @@ export default function AssetViewer({ assets, onUpdateRequestSubmit, onAttention
 
   const renderAssets = (assetList: Asset[], level = 0) => {
     return assetList.flatMap(asset => {
+      if (!asset) return []; // Guard against undefined assets in the list
       const isFolder = asset.type === 'folder';
       const isExpanded = !!expandedFolders[asset.id];
       const clientRequestActive = asset.clientLastRequest && (asset.status === 'waiting' || asset.status === 'in-progress');
@@ -120,7 +130,7 @@ export default function AssetViewer({ assets, onUpdateRequestSubmit, onAttention
                 </Button>
               ) : (
                 asset.previewUrl ? (
-                  <Image src={asset.previewUrl} alt={asset.name} width={32} height={32} className="rounded object-cover h-8 w-8 border" data-ai-hint={asset.dataAiHint || `${asset.type} icon`}/>
+                  <Image src={asset.previewUrl} alt={asset.name || 'asset preview'} width={32} height={32} className="rounded object-cover h-8 w-8 border" data-ai-hint={asset.dataAiHint || `${asset.type} icon`}/>
                 ) : (
                   <span className="inline-block w-8 h-8 flex items-center justify-center">
                     <AssetIcon type={asset.type} />
@@ -133,7 +143,7 @@ export default function AssetViewer({ assets, onUpdateRequestSubmit, onAttention
           <TableCell className="hidden sm:table-cell">{asset.type === 'folder' ? 'Folder' : asset.type.charAt(0).toUpperCase() + asset.type.slice(1)}</TableCell>
           <TableCell>
             <Badge variant={getStatusBadgeVariant(asset.status)} className={cn("font-semibold", getStatusBadgeClassName(asset.status))}>
-              {asset.status.charAt(0).toUpperCase() + asset.status.slice(1).replace('-', ' ')}
+              {asset.status ? (asset.status.charAt(0).toUpperCase() + asset.status.slice(1).replace('-', ' ')) : 'Unknown'}
             </Badge>
           </TableCell>
           <TableCell className="text-center">
@@ -163,7 +173,7 @@ export default function AssetViewer({ assets, onUpdateRequestSubmit, onAttention
             </TableCell>
           )}
            {/* Request Column - Client View Only */}
-           {!onAttentionIconClick && !isFolder && (
+           {!onAttentionIconClick && !isFolder && onUpdateRequestSubmit && (
             <TableCell>
               {clientRequestActive ? (
                 <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white text-xs h-8" disabled>
@@ -187,12 +197,11 @@ export default function AssetViewer({ assets, onUpdateRequestSubmit, onAttention
             <div className="flex gap-1 justify-end">
               {!isFolder && asset.downloadUrl && (
                 <Button variant="outline" size="icon" asChild title="Download asset">
-                  <a href={asset.downloadUrl} download>
+                  <a href={asset.downloadUrl} download target="_blank" rel="noopener noreferrer">
                     <Download className="h-4 w-4" />
                   </a>
                 </Button>
               )}
-              {/* The old Edit3 button for RequestUpdateForm is removed to avoid confusion with the new "Request" button/flow */}
             </div>
           </TableCell>
         </TableRow>
@@ -222,13 +231,17 @@ export default function AssetViewer({ assets, onUpdateRequestSubmit, onAttention
           <CardDescription>This brand kit is currently empty or assets are still being processed.</CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground">Admins can upload new assets using the button above.</p>
+          <p className="text-muted-foreground">Admins can upload new assets using the button above (via Sanity Studio).</p>
         </CardContent>
       </Card>
     );
   }
   
-  const numColumns = onViewVersionsClick ? 9 : (onAttentionIconClick ? 8 : 8); // Adjust based on admin/client view
+  // Determine number of columns based on active features/props
+  let numColumns = 6; // Base: Name, Type, Status, Attention, Last Modified, Size, Actions
+  if (onViewVersionsClick) numColumns++; // Versions column
+  if (!onAttentionIconClick && onUpdateRequestSubmit) numColumns++; // Client Request column
+  else if (onAttentionIconClick) numColumns++; // Admin view has a placeholder or specific content for this slot
 
   return (
     <div className="border rounded-lg overflow-hidden bg-muted">
@@ -241,8 +254,8 @@ export default function AssetViewer({ assets, onUpdateRequestSubmit, onAttention
               <TableHead>Status</TableHead>
               <TableHead className="text-center w-[80px]">Attention</TableHead>
               {onViewVersionsClick && <TableHead className="hidden md:table-cell w-[120px]">Versions</TableHead>}
-              {!onAttentionIconClick && <TableHead className="w-[120px]">Request</TableHead>} 
-              {onAttentionIconClick && <TableHead className="w-[120px] hidden md:table-cell"></TableHead>} {/* Admin view placeholder for request col */}
+              {(!onAttentionIconClick && onUpdateRequestSubmit) && <TableHead className="w-[120px]">Request</TableHead>} 
+              {(onAttentionIconClick) && <TableHead className="w-[120px] hidden md:table-cell"></TableHead>}
               <TableHead className="hidden md:table-cell w-[180px]">Last Modified</TableHead>
               <TableHead className="hidden lg:table-cell w-[100px]">Size</TableHead>
               <TableHead className="text-right pr-6 w-[100px]">Actions</TableHead>
@@ -253,12 +266,12 @@ export default function AssetViewer({ assets, onUpdateRequestSubmit, onAttention
           </TableBody>
         </Table>
       </div>
-      <ClientUpdateRequestModal
+      {onUpdateRequestSubmit && <ClientUpdateRequestModal
         asset={selectedAssetForRequest}
         isOpen={isUpdateRequestModalOpen}
         onOpenChange={setIsUpdateRequestModalOpen}
         onUpdateRequestSubmit={onUpdateRequestSubmit}
-      />
+      />}
       <ViewMyRequestModal
         assetName={selectedAssetForRequest?.name || null}
         request={selectedAssetForRequest?.clientLastRequest || null}
