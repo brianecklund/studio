@@ -70,7 +70,8 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted to-background p-4">
+    // Adjusted to flex-grow to fit within the new RootLayout structure
+    <div className="flex-grow flex items-center justify-center bg-gradient-to-br from-background via-muted to-background p-4">
       <Card className="w-full max-w-md shadow-2xl rounded-xl">
         <CardHeader className="text-center p-6 sm:p-8">
           <div className="mx-auto bg-primary text-primary-foreground rounded-full p-3 w-16 h-16 flex items-center justify-center mb-4 shadow-md">

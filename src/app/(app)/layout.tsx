@@ -1,4 +1,5 @@
-import AppHeader from '@/components/layout/app-header';
+
+// AppHeader import removed as it's now in RootLayout
 
 export default function AppLayout({
   children,
@@ -6,11 +7,10 @@ export default function AppLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen flex flex-col">
-      <AppHeader />
-      <main className="flex-1 container py-8">
-        {children}
-      </main>
+    // Removed min-h-screen and flex flex-col, as RootLayout handles overall page structure
+    // AppHeader removed from here
+    <div className="flex-1 container py-8"> {/* Ensure content within (app) also grows */}
+      {children}
     </div>
   );
 }
