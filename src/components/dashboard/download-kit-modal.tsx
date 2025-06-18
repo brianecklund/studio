@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Folder, FileText, Image as ImageIcon, Video, FileArchive as FileArchiveIcon, Loader2, PackageDown } from 'lucide-react';
+import { Folder, FileText, Image as ImageIcon, Video, FileArchive as FileArchiveIcon, Loader2, Archive, PackageIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface DownloadKitModalProps {
@@ -243,7 +243,7 @@ export default function DownloadKitModal({ isOpen, onOpenChange, assets, onDownl
       <DialogContent className="sm:max-w-lg max-h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center">
-            <PackageDown className="mr-2 h-5 w-5 text-primary" />
+            <PackageIcon className="mr-2 h-5 w-5 text-primary" />
             Prepare Kit Download
           </DialogTitle>
           <DialogDescription>
@@ -287,3 +287,4 @@ export default function DownloadKitModal({ isOpen, onOpenChange, assets, onDownl
     </Dialog>
   );
 }
+
