@@ -1,3 +1,4 @@
+
 // src/app/studio/[[...index]]/page.tsx
 'use client';
 
