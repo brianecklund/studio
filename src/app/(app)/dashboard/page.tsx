@@ -1,97 +1,86 @@
 
 'use client';
 
-import AssetViewer from '@/components/dashboard/asset-viewer';
-import NewAssetRequestForm from '@/components/dashboard/new-asset-request-form';
-import AiSuggestionModal from '@/components/dashboard/ai-suggestion-modal';
-import DownloadKitModal from '@/components/dashboard/download-kit-modal';
+import Link from 'next/link';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { FilePlus2, Lightbulb, Archive } from 'lucide-react';
-import type { Asset, ClientSubmittedRequest } from '@/lib/types';
-import { useState, useEffect } from 'react';
-import { toast } from '@/hooks/use-toast';
-import { mockClientAssets } from '@/lib/mock-data'; // Import to get one client's assets
+import { Package, FileText as FileTextIcon, FolderKanban, BookOpen, ArrowRight } from 'lucide-react'; // Renamed FileText to FileTextIcon to avoid conflict
 
-// Initial mock data - only use the assets from one client for the dashboard
-const initialMockAssets: Asset[] = mockClientAssets['bk001']?.assets || [];
+interface DashboardItem {
+  title: string;
+  description: string;
+  icon: React.ElementType;
+  link: string;
+  linkText: string;
+}
 
+const dashboardItems: DashboardItem[] = [
+  {
+    title: 'Brand Kit',
+    description: 'Access logos, icons, artwork, photography, and brand documentation.',
+    icon: Package,
+    link: '/dashboard/brand-kit',
+    linkText: 'View Brand Kit',
+  },
+  {
+    title: 'Templates',
+    description: 'Find guides, documentation, template design files, and Canva references.',
+    icon: FileTextIcon, // Using renamed import
+    link: '/dashboard/templates',
+    linkText: 'Access Templates',
+  },
+  {
+    title: 'Projects',
+    description: 'Track current projects, view planned work, and reference completed projects.',
+    icon: FolderKanban,
+    link: '/dashboard/projects',
+    linkText: 'Manage Projects',
+  },
+  {
+    title: 'Documents',
+    description: 'Review project contracts, billing information, and other important documents.',
+    icon: BookOpen,
+    link: '/dashboard/documents',
+    linkText: 'View Documents',
+  },
+];
 
 export default function DashboardPage() {
-  const [assets, setAssets] = useState<Asset[]>(initialMockAssets);
-  const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
-  
-  // Effect to ensure client-side state initialization if needed for complex scenarios
-  // For now, direct useState initialization is fine.
-  // useEffect(() => {
-  //   setAssets(initialMockAssets);
-  // }, []);
-
-
-  const currentBrandKitContent = assets.map(asset => `${asset.name} (${asset.type})`).join(', ');
-  const previousRequestsSummary = "Client previously requested a new logo variant and social media templates for Instagram.";
-
-  const handleDownloadConfirm = (selectedAssets: Asset[]) => {
-    console.log("Downloading selected assets:", selectedAssets.map(a => a.name));
-    toast({
-      title: "Download Started (Mock)",
-      description: `Preparing a ZIP file with ${selectedAssets.length} selected items.`,
-    });
-    setIsDownloadModalOpen(false);
-  };
-
-  const handleAssetUpdateRequest = (assetId: string, requestData: ClientSubmittedRequest) => {
-    setAssets(prevAssets =>
-      prevAssets.map(asset =>
-        asset.id === assetId
-          ? {
-              ...asset,
-              clientLastRequest: requestData,
-              clientRequestDetails: requestData.details, // Also store main details here for admin view
-              needsAttention: true,
-              status: 'waiting',
-              lastModified: new Date().toISOString(),
-            }
-          : asset
-      )
-    );
-    // In a real app, you'd also send this update to the backend.
-  };
-
-
   return (
     <div className="space-y-8">
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-        <h1 className="font-headline text-3xl font-bold">Your Brand Kit</h1>
-        <div className="flex gap-2 flex-wrap justify-center sm:justify-end">
-          <NewAssetRequestForm triggerButton={
-            <Button>
-              <FilePlus2 className="mr-2 h-4 w-4" /> New Asset Request
-            </Button>
-          } />
-          <AiSuggestionModal 
-            currentBrandKitContent={currentBrandKitContent} 
-            previousRequests={previousRequestsSummary}
-            triggerButton={
-              <Button variant="outline">
-                <Lightbulb className="mr-2 h-4 w-4" /> Get AI Suggestions
-              </Button>
-            }
-          />
-          <Button variant="outline" onClick={() => setIsDownloadModalOpen(true)}>
-            <Archive className="mr-2 h-4 w-4" /> Download Kit
-          </Button>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="font-headline text-3xl font-bold">Client Dashboard</h1>
+          <p className="text-muted-foreground mt-1">
+            Welcome! Access your brand assets, templates, projects, and documents.
+          </p>
         </div>
       </div>
-      <AssetViewer 
-        assets={assets} 
-        onUpdateRequestSubmit={handleAssetUpdateRequest}
-      />
-      <DownloadKitModal
-        isOpen={isDownloadModalOpen}
-        onOpenChange={setIsDownloadModalOpen}
-        assets={assets}
-        onDownloadConfirm={handleDownloadConfirm}
-      />
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+        {dashboardItems.map((item) => (
+          <Card key={item.title} className="flex flex-col hover:shadow-lg transition-shadow duration-200">
+            <CardHeader className="flex flex-row items-start gap-4 space-y-0">
+              <item.icon className="h-10 w-10 text-primary mt-1" />
+              <div className="flex-1">
+                <CardTitle className="font-headline text-xl">{item.title}</CardTitle>
+                <CardDescription className="mt-1">{item.description}</CardDescription>
+              </div>
+            </CardHeader>
+            <CardContent className="flex-grow">
+              {/* Additional content for the card can go here if needed */}
+            </CardContent>
+            <CardFooter className="pt-4">
+              <Button asChild className="w-full">
+                <Link href={item.link}>
+                  {item.linkText}
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+            </CardFooter>
+          </Card>
+        ))}
+      </div>
     </div>
   );
 }
