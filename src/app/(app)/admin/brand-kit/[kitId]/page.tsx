@@ -9,15 +9,19 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import AssetViewer from '@/components/dashboard/asset-viewer';
 import { mockClientAssets } from '@/lib/mock-data';
 import type { Asset } from '@/lib/types';
-import { useState } from 'react';
+import React, { useState } from 'react'; // Import React for React.use
 import AdminAttentionRequestModal from '@/components/admin/admin-attention-request-modal';
 import AssetVersionHistoryModal from '@/components/admin/asset-version-history-modal';
 
-export default function AdminBrandKitDetailPage({ params }: { params: { kitId: string } }) {
+export default function AdminBrandKitDetailPage({ params: paramsPromise }: { params: Promise<{ kitId: string }> }) {
   const [selectedAssetForAttention, setSelectedAssetForAttention] = useState<Asset | null>(null);
   const [isAttentionModalOpen, setIsAttentionModalOpen] = useState(false);
   const [selectedAssetForVersions, setSelectedAssetForVersions] = useState<Asset | null>(null);
   const [isVersionsModalOpen, setIsVersionsModalOpen] = useState(false);
+
+  // Unwrap the params promise using React.use()
+  // This hook must be called inside a Client Component and at the top level.
+  const params = React.use(paramsPromise);
 
   const kitDetails = mockClientAssets[params.kitId];
 
