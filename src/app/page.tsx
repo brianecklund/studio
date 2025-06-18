@@ -39,14 +39,14 @@ export default function HomePage() {
       <section className="py-20 md:py-32 bg-gradient-to-br from-primary via-purple-700 to-accent text-primary-foreground">
         <div className="container mx-auto px-4 text-center">
           <h1 className="font-headline text-4xl md:text-6xl font-bold mb-6">
-            Welcome to Brand Hub
+            Welcome to Side Brain
           </h1>
           <p className="text-lg md:text-xl mb-8 max-w-2xl mx-auto">
-            Your all-in-one platform for managing brand assets, tracking projects, and collaborating seamlessly.
+            Your all-in-one platform by Side Brain Studios for managing brand assets, tracking projects, and collaborating seamlessly.
           </p>
           <div className="space-x-4">
             <Button size="lg" asChild className="bg-background text-primary hover:bg-background/90">
-              <Link href="/login">Access Your Hub</Link>
+              <Link href="/login">Access Your Portal</Link>
             </Button>
             <Button size="lg" variant="outline" className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground/10">
               Learn More
@@ -59,7 +59,7 @@ export default function HomePage() {
       <section className="py-16 md:py-24 bg-background">
         <div className="container mx-auto px-4">
           <h2 className="font-headline text-3xl md:text-4xl font-bold text-center mb-12 text-foreground">
-            Why Choose Brand Hub?
+            Why Choose Side Brain?
           </h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {features.map((feature, index) => (
@@ -86,7 +86,7 @@ export default function HomePage() {
                 Visualize Your Brand's Potential
               </h2>
               <p className="text-lg mb-6 text-muted-foreground">
-                Brand Hub provides a clear and intuitive interface to manage your assets effectively. See everything at a glance, from file previews to project statuses.
+                Side Brain provides a clear and intuitive interface to manage your assets effectively. See everything at a glance, from file previews to project statuses.
               </p>
               <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90">
                 Explore Features
@@ -95,7 +95,7 @@ export default function HomePage() {
             <div className="lg:w-1/2 mt-8 lg:mt-0">
               <Image
                 src="https://placehold.co/600x400.png"
-                alt="Brand Hub Interface Preview"
+                alt="Side Brain Interface Preview"
                 width={600}
                 height={400}
                 className="rounded-lg shadow-xl"

@@ -79,7 +79,7 @@ export default function LoginPage() {
           </div>
           <CardTitle className="font-headline text-3xl sm:text-4xl">Welcome Back!</CardTitle>
           <CardDescription className="text-base">
-            Please enter your credentials to access your Brand Hub.
+            Please enter your credentials to access your Side Brain portal.
           </CardDescription>
         </CardHeader>
         <Form {...form}>

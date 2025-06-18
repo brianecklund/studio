@@ -16,9 +16,9 @@ export default function AppHeader() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
-        <Link href="/" className="flex items-center gap-2" aria-label="Brand Hub Home">
+        <Link href="/" className="flex items-center gap-2" aria-label="Side Brain Home">
           <Layers3 className="h-7 w-7 text-primary" />
-          <span className="font-headline text-2xl font-semibold text-primary">Brand Hub</span>
+          <span className="font-headline text-2xl font-semibold text-primary">Side Brain</span>
         </Link>
         <div className="flex items-center gap-4">
           <nav className="hidden md:flex gap-2">
@@ -38,7 +38,7 @@ export default function AppHeader() {
               <Button variant="ghost" className="relative h-9 w-9 rounded-full">
                 <Avatar className="h-9 w-9">
                   <AvatarImage src="https://placehold.co/100x100.png" alt="User Avatar" data-ai-hint="user avatar" />
-                  <AvatarFallback>BH</AvatarFallback>
+                  <AvatarFallback>SB</AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>

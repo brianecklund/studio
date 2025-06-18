@@ -5,8 +5,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import AppHeader from '@/components/layout/app-header'; // Added AppHeader import
 
 export const metadata: Metadata = {
-  title: 'Brand Hub',
-  description: 'Your central place for brand assets and project management.',
+  title: 'Side Brain',
+  description: 'Your central place for brand assets and project management by Side Brain Studios.',
 };
 
 export default function RootLayout({
@@ -31,7 +31,7 @@ export default function RootLayout({
           {/* Footer moved from homepage to be global */}
           <footer className="py-8 border-t bg-background">
             <div className="container mx-auto px-4 text-center text-muted-foreground">
-              <p>&copy; {new Date().getFullYear()} Brand Hub. All rights reserved.</p>
+              <p>&copy; {new Date().getFullYear()} Side Brain. All rights reserved.</p>
             </div>
           </footer>
         </TooltipProvider>
