@@ -2,6 +2,19 @@
 export type AssetStatus = "waiting" | "in-progress" | "completed";
 export type AssetType = "folder" | "pdf" | "image" | "video" | "document" | "archive" | "other";
 
+export interface AssetVersion {
+  id: string;
+  versionNumber: number;
+  uploadedAt: string; // ISO date string
+  uploadedBy: string; // User name or ID
+  notes?: string;
+  fileName: string;
+  fileSize: string;
+  downloadUrl: string;
+  previewUrl?: string; // Optional preview for the specific version
+  dataAiHint?: string;
+}
+
 export interface Asset {
   id: string;
   name: string;
@@ -15,7 +28,9 @@ export interface Asset {
   previewUrl?: string; // only for files, e.g. image preview
   children?: Asset[]; // For folders
   createdAt: string; // ISO date string
-  dataAiHint?: string; // Added for consistency, though not used everywhere yet
+  dataAiHint?: string;
+  clientRequestDetails?: string; // Details from client for attention items
+  versions?: AssetVersion[]; // Version history for the asset
 }
 
 export interface Client {

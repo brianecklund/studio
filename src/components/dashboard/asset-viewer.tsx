@@ -5,16 +5,18 @@ import type { Asset, AssetStatus } from '@/lib/types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Folder, FileText, Image as ImageIcon, Video, FileArchive, AlertTriangle, Download, Edit3, ChevronDown, ChevronRight } from 'lucide-react';
+import { Folder, FileText, Image as ImageIcon, Video, FileArchive, AlertTriangle, Download, Edit3, ChevronDown, ChevronRight, History } from 'lucide-react';
 import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useState } from 'react';
-import RequestUpdateForm from './request-update-form';
+import RequestUpdateForm from './request-update-form'; // Client-side form
 import { format } from 'date-fns';
-import { cn } from "@/lib/utils"; // Added this import
+import { cn } from "@/lib/utils";
 
 interface AssetViewerProps {
   assets: Asset[];
+  onAttentionIconClick?: (asset: Asset) => void; // For admin: opens attention details modal
+  onViewVersionsClick?: (asset: Asset) => void;  // For admin: opens versions history modal
 }
 
 const getStatusBadgeVariant = (status: AssetStatus): 'default' | 'secondary' | 'destructive' | 'outline' => {
@@ -31,39 +33,37 @@ const getStatusBadgeVariant = (status: AssetStatus): 'default' | 'secondary' | '
 };
 
 const getStatusBadgeClassName = (status: AssetStatus): string => {
-  // Using Tailwind classes for more direct styling control for badges
   switch (status) {
     case 'completed':
-      return 'bg-green-100 text-green-800 border-green-300'; // Lighter bg, darker text for contrast
+      return 'bg-green-100 text-green-800 border-green-300';
     case 'in-progress':
       return 'bg-yellow-100 text-yellow-800 border-yellow-300';
     case 'waiting':
       return 'bg-blue-100 text-blue-800 border-blue-300';
     default:
-      return 'bg-gray-100 text-gray-800 border-gray-300'; // Fallback
+      return 'bg-gray-100 text-gray-800 border-gray-300';
   }
 }
-
 
 const AssetIcon = ({ type, isFolder }: { type: Asset['type'], isFolder?: boolean }) => {
   if (isFolder) return <Folder className="h-5 w-5 text-accent" />;
   switch (type) {
     case 'pdf':
-      return <FileText className="h-5 w-5 text-red-600" />; // PDF often associated with red (Adobe)
+      return <FileText className="h-5 w-5 text-red-600" />;
     case 'image':
       return <ImageIcon className="h-5 w-5 text-purple-600" />;
     case 'video':
       return <Video className="h-5 w-5 text-orange-600" />;
     case 'document':
-      return <FileText className="h-5 w-5 text-blue-600" />; // Docs (Word, Google Docs) often blue
+      return <FileText className="h-5 w-5 text-blue-600" />;
     case 'archive':
-      return <FileArchive className="h-5 w-5 text-yellow-600" />; // Archives often yellow/brown
+      return <FileArchive className="h-5 w-5 text-yellow-600" />;
     default:
       return <FileText className="h-5 w-5 text-gray-500" />;
   }
 };
 
-export default function AssetViewer({ assets }: AssetViewerProps) {
+export default function AssetViewer({ assets, onAttentionIconClick, onViewVersionsClick }: AssetViewerProps) {
   const [expandedFolders, setExpandedFolders] = useState<Record<string, boolean>>({});
 
   const toggleFolder = (folderId: string) => {
@@ -83,7 +83,7 @@ export default function AssetViewer({ assets }: AssetViewerProps) {
             ${asset.needsAttention ? 'border-l-2 border-l-destructive' : ''}
           `}
         >
-          <TableCell style={{ paddingLeft: `${1 + level * 1.5}rem` }} className="w-[40%] sm:w-auto">
+          <TableCell style={{ paddingLeft: `${1 + level * 1.5}rem` }} className="w-[30%] sm:w-auto">
             <div className="flex items-center gap-2">
               {isFolder ? (
                 <Button variant="ghost" size="sm" onClick={() => toggleFolder(asset.id)} className="p-1 h-auto -ml-1">
@@ -92,7 +92,7 @@ export default function AssetViewer({ assets }: AssetViewerProps) {
                 </Button>
               ) : (
                 asset.previewUrl ? (
-                  <Image src={asset.previewUrl} alt={asset.name} width={32} height={32} className="rounded object-cover h-8 w-8 border" data-ai-hint={`${asset.type} icon`}/>
+                  <Image src={asset.previewUrl} alt={asset.name} width={32} height={32} className="rounded object-cover h-8 w-8 border" data-ai-hint={asset.dataAiHint || `${asset.type} icon`}/>
                 ) : (
                   <span className="inline-block w-8 h-8 flex items-center justify-center">
                     <AssetIcon type={asset.type} />
@@ -109,10 +109,29 @@ export default function AssetViewer({ assets }: AssetViewerProps) {
             </Badge>
           </TableCell>
           <TableCell className="text-center">
-            {asset.needsAttention && <AlertTriangle className="h-5 w-5 text-destructive mx-auto" title="Needs Attention"/>}
+            {asset.needsAttention && (
+              onAttentionIconClick ? (
+                <Button variant="ghost" size="icon" className="h-auto p-1 text-destructive hover:text-destructive/80" onClick={() => onAttentionIconClick(asset)} title="View Client Request">
+                  <AlertTriangle className="h-5 w-5" />
+                </Button>
+              ) : (
+                <AlertTriangle className="h-5 w-5 text-destructive mx-auto" title="Needs Attention"/>
+              )
+            )}
           </TableCell>
-          <TableCell className="hidden md:table-cell text-muted-foreground">{format(new Date(asset.lastModified), 'PPp')}</TableCell>
-          <TableCell className="hidden lg:table-cell text-muted-foreground">{asset.size || (asset.type === 'folder' ? '-' : 'N/A')}</TableCell>
+          {onViewVersionsClick && ( // Only show Versions column if callback is provided (admin view)
+            <TableCell className="hidden md:table-cell text-xs">
+              {!isFolder && asset.versions && asset.versions.length > 0 ? (
+                <Button variant="link" size="sm" className="p-0 h-auto text-xs" onClick={() => onViewVersionsClick(asset)}>
+                  <History className="mr-1 h-3 w-3" /> {asset.versions.length} Version{asset.versions.length > 1 ? 's' : ''}
+                </Button>
+              ) : isFolder ? null : (
+                <span className="text-muted-foreground">-</span>
+              )}
+            </TableCell>
+          )}
+          <TableCell className="hidden md:table-cell text-muted-foreground text-xs">{format(new Date(asset.lastModified), 'PPp')}</TableCell>
+          <TableCell className="hidden lg:table-cell text-muted-foreground text-xs">{asset.size || (asset.type === 'folder' ? '-' : 'N/A')}</TableCell>
           <TableCell className="text-right">
             <div className="flex gap-1 justify-end">
               {!isFolder && asset.downloadUrl && (
@@ -122,11 +141,13 @@ export default function AssetViewer({ assets }: AssetViewerProps) {
                   </a>
                 </Button>
               )}
-              <RequestUpdateForm asset={asset} triggerButton={
-                <Button variant="outline" size="icon" title="Request update or provide feedback">
-                  <Edit3 className="h-4 w-4" />
-                </Button>
-              }/>
+              {!onAttentionIconClick && !isFolder && ( // Show client-side request update form if not in admin mode
+                 <RequestUpdateForm asset={asset} triggerButton={
+                    <Button variant="outline" size="icon" title="Request update or provide feedback">
+                      <Edit3 className="h-4 w-4" />
+                    </Button>
+                  }/>
+              )}
             </div>
           </TableCell>
         </TableRow>
@@ -137,7 +158,7 @@ export default function AssetViewer({ assets }: AssetViewerProps) {
       } else if (isFolder && isExpanded && (!asset.children || asset.children.length === 0)) {
         rows.push(
           <TableRow key={`${asset.id}-empty`} className="bg-muted/20 hover:bg-muted/40">
-            <TableCell colSpan={7} style={{ paddingLeft: `${1 + (level + 1) * 1.5}rem` }} className="text-muted-foreground italic">
+            <TableCell colSpan={onViewVersionsClick ? 8 : 7} style={{ paddingLeft: `${1 + (level + 1) * 1.5}rem` }} className="text-muted-foreground italic">
               Folder is empty.
             </TableCell>
           </TableRow>
@@ -162,19 +183,23 @@ export default function AssetViewer({ assets }: AssetViewerProps) {
     );
   }
 
+  const colSpanCount = onViewVersionsClick ? 8 : 7;
+
+
   return (
     <div className="border rounded-lg overflow-hidden">
       <div className="overflow-x-auto">
         <Table>
           <TableHeader className="bg-muted/50">
             <TableRow>
-              <TableHead className="w-[40%] sm:w-auto">Name</TableHead>
+              <TableHead className="w-[30%] sm:w-auto">Name</TableHead>
               <TableHead className="hidden sm:table-cell">Type</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead className="text-center">Attention</TableHead>
-              <TableHead className="hidden md:table-cell">Last Modified</TableHead>
-              <TableHead className="hidden lg:table-cell">Size</TableHead>
-              <TableHead className="text-right pr-6">Actions</TableHead>
+              <TableHead className="text-center w-[80px]">Attention</TableHead>
+              {onViewVersionsClick && <TableHead className="hidden md:table-cell w-[120px]">Versions</TableHead>}
+              <TableHead className="hidden md:table-cell w-[180px]">Last Modified</TableHead>
+              <TableHead className="hidden lg:table-cell w-[100px]">Size</TableHead>
+              <TableHead className="text-right pr-6 w-[100px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

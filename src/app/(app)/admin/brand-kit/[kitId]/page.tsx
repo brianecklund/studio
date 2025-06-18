@@ -1,13 +1,24 @@
 
+'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowLeft, Edit, UploadCloud, Briefcase, Building } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import AssetViewer from '@/components/dashboard/asset-viewer';
-import { mockClientAssets } from '@/lib/mock-data'; // Import centralized mock data
+import { mockClientAssets } from '@/lib/mock-data';
+import type { Asset } from '@/lib/types';
+import { useState } from 'react';
+import AdminAttentionRequestModal from '@/components/admin/admin-attention-request-modal';
+import AssetVersionHistoryModal from '@/components/admin/asset-version-history-modal';
 
 export default function AdminBrandKitDetailPage({ params }: { params: { kitId: string } }) {
+  const [selectedAssetForAttention, setSelectedAssetForAttention] = useState<Asset | null>(null);
+  const [isAttentionModalOpen, setIsAttentionModalOpen] = useState(false);
+  const [selectedAssetForVersions, setSelectedAssetForVersions] = useState<Asset | null>(null);
+  const [isVersionsModalOpen, setIsVersionsModalOpen] = useState(false);
+
   const kitDetails = mockClientAssets[params.kitId];
 
   if (!kitDetails) {
@@ -24,6 +35,16 @@ export default function AdminBrandKitDetailPage({ params }: { params: { kitId: s
       </div>
     );
   }
+
+  const handleAttentionIconClick = (asset: Asset) => {
+    setSelectedAssetForAttention(asset);
+    setIsAttentionModalOpen(true);
+  };
+
+  const handleViewVersionsClick = (asset: Asset) => {
+    setSelectedAssetForVersions(asset);
+    setIsVersionsModalOpen(true);
+  };
 
   return (
     <div className="space-y-8">
@@ -70,21 +91,30 @@ export default function AdminBrandKitDetailPage({ params }: { params: { kitId: s
             Brand Assets
           </CardTitle>
           <CardDescription>
-            Manage all assets for {kitDetails.clientName}. Admins can upload, edit, or remove assets.
+            Manage all assets for {kitDetails.clientName}. Admins can view client requests and manage asset versions.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <AssetViewer assets={kitDetails.assets} />
+          <AssetViewer 
+            assets={kitDetails.assets} 
+            onAttentionIconClick={handleAttentionIconClick}
+            onViewVersionsClick={handleViewVersionsClick}
+          />
         </CardContent>
       </Card>
 
-      {/* Placeholder for other admin sections, e.g., Client Users, Kit Settings */}
-      {/* 
-      <Card>
-        <CardHeader><CardTitle>Client Users</CardTitle></CardHeader>
-        <CardContent><p>Manage users associated with this brand kit.</p></CardContent>
-      </Card>
-      */}
+      <AdminAttentionRequestModal 
+        asset={selectedAssetForAttention}
+        isOpen={isAttentionModalOpen}
+        onOpenChange={setIsAttentionModalOpen}
+      />
+
+      <AssetVersionHistoryModal
+        asset={selectedAssetForVersions}
+        isOpen={isVersionsModalOpen}
+        onOpenChange={setIsVersionsModalOpen}
+      />
+
     </div>
   );
 }
