@@ -1,21 +1,22 @@
+// src/app/studio/[[...index]]/page.tsx
+'use client';
 
-// This route enables showing the Sanity Studio at /studio
+// This file is part of a route conflict and should ideally be deleted.
+// It conflicts with src/app/studio/[[...tool]]/page.tsx
+// This version is neutered to prevent errors.
 
-'use client'
-
-import {NextStudio} from 'next-sanity/studio'
-import config from '../../../../sanity.config' // Adjust path if your sanity.config is elsewhere
-
-export default function StudioPage() {
-  //  Supports the same props as `import {Studio} from 'sanity'`, `config` is required
-  return <NextStudio config={config} />
+export default function DeprecatedStudioIndexPage() {
+  // Render nothing or a placeholder to avoid Sanity Studio initialization
+  // and any potential conflicts with the correct [[...tool]] route.
+  return null;
 }
 
-// If you have static exports enabled, make sure to add this so the slug route is generated.
+// This function is required for dynamic segment pages, 
+// but we return an empty array or a self-consistent param 
+// to avoid claiming paths meant for the [[...tool]] route.
 export function generateStaticParams() {
-  return [{ index: [] }]; // Renders the studio at /studio
+  return [{ index: [] }]; // Matches its own slug name `index`
 }
 
-// Opt-out of caching for the studio route
+// Opt-out of caching for this deprecated route.
 export const dynamic = 'force-dynamic';
-
