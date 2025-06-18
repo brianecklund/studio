@@ -1,3 +1,4 @@
+
 import AppHeader from '@/components/layout/app-header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -44,7 +45,7 @@ export default function HomePage() {
             </p>
             <div className="space-x-4">
               <Button size="lg" asChild className="bg-background text-primary hover:bg-background/90">
-                <Link href="/dashboard">Go to Dashboard</Link>
+                <Link href="/login">Access Your Hub</Link>
               </Button>
               <Button size="lg" variant="outline" className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground/10">
                 Learn More
