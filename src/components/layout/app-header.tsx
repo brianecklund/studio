@@ -15,7 +15,8 @@ import { Layers3, UserCog } from 'lucide-react';
 export default function AppHeader() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between">
+      {/* Removed 'container' and added 'px-2' for edge padding */}
+      <div className="flex h-16 items-center justify-between px-2 sm:px-4">
         <Link href="/" className="flex items-center gap-2" aria-label="Side Brain Home">
           <Layers3 className="h-7 w-7 text-primary" />
           <span className="font-headline text-2xl font-semibold text-primary">Side Brain</span>
@@ -64,7 +65,7 @@ export default function AppHeader() {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-           {/* Mobile Menu Trigger (example, full implementation might need more) */}
+           {/* Mobile Menu Trigger */}
            <div className="md:hidden">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -80,6 +81,7 @@ export default function AppHeader() {
                 <DropdownMenuItem asChild>
                   <Link href="/admin/dashboard">Admin</Link>
                 </DropdownMenuItem>
+                {/* Add other mobile nav items if needed */}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
