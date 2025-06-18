@@ -1,4 +1,5 @@
 
+
 export type AssetStatus = "waiting" | "in-progress" | "completed";
 export type AssetType = "folder" | "pdf" | "image" | "video" | "document" | "archive" | "other";
 
@@ -82,3 +83,4 @@ export interface AttentionItem {
   lastModified: string;
   // Potentially add 'requestSummary' or link to specific request if that data exists
 }
+
