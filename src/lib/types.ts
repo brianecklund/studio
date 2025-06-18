@@ -1,5 +1,4 @@
 
-
 export type AssetStatus = "waiting" | "in-progress" | "completed";
 export type AssetType = "folder" | "pdf" | "image" | "video" | "document" | "archive" | "other";
 
@@ -16,6 +15,13 @@ export interface AssetVersion {
   dataAiHint?: string;
 }
 
+export interface ClientSubmittedRequest {
+  details: string;
+  referenceFileNames?: string[]; // Store names of uploaded files
+  requestedDelivery?: string; // Store as ISO string or formatted string
+  submittedAt: string; // ISO date string
+}
+
 export interface Asset {
   id: string;
   name: string;
@@ -30,8 +36,9 @@ export interface Asset {
   children?: Asset[]; // For folders
   createdAt: string; // ISO date string
   dataAiHint?: string;
-  clientRequestDetails?: string; // Details from client for attention items
+  clientRequestDetails?: string; // General details, or admin notes regarding client request
   versions?: AssetVersion[]; // Version history for the asset
+  clientLastRequest?: ClientSubmittedRequest | null; // Stores the latest client request
 }
 
 export interface Client {
@@ -83,4 +90,3 @@ export interface AttentionItem {
   lastModified: string;
   // Potentially add 'requestSummary' or link to specific request if that data exists
 }
-

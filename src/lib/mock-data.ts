@@ -27,6 +27,7 @@ export const mockClientAssets: Record<string, { clientName: string; industry: st
         downloadUrl: '#', 
         createdAt: '2023-01-15T00:00:00Z',
         versions: sampleVersions,
+        clientLastRequest: null,
       },
       { 
         id: 'inno-2', 
@@ -39,7 +40,8 @@ export const mockClientAssets: Record<string, { clientName: string; industry: st
         size: '5.5 MB', 
         downloadUrl: '#', 
         createdAt: '2023-01-20T00:00:00Z',
-        versions: [{ id: 'bg-v1', versionNumber: 1, uploadedAt: '2023-11-15T14:30:00Z', uploadedBy: 'Content Team', fileName: 'brand_guidelines_final.pdf', fileSize: '5.5MB', downloadUrl: '#'}]
+        versions: [{ id: 'bg-v1', versionNumber: 1, uploadedAt: '2023-11-15T14:30:00Z', uploadedBy: 'Content Team', fileName: 'brand_guidelines_final.pdf', fileSize: '5.5MB', downloadUrl: '#'}],
+        clientLastRequest: null,
       },
       { 
         id: 'inno-3', 
@@ -53,7 +55,13 @@ export const mockClientAssets: Record<string, { clientName: string; industry: st
         downloadUrl: '#', 
         createdAt: '2023-10-01T00:00:00Z',
         clientRequestDetails: "Client says: 'The stats on page 2 are outdated. Please update with the latest Q4 figures. Also, can we change the main image to something more futuristic?'",
-        versions: [{ id: 'op-v1', versionNumber: 1, uploadedAt: '2023-10-01T00:00:00Z', uploadedBy: 'Marketing Team', fileName: 'one_pager_draft.docx', fileSize: '2.0MB', downloadUrl: '#'}]
+        versions: [{ id: 'op-v1', versionNumber: 1, uploadedAt: '2023-10-01T00:00:00Z', uploadedBy: 'Marketing Team', fileName: 'one_pager_draft.docx', fileSize: '2.0MB', downloadUrl: '#'}],
+        clientLastRequest: { // Example of an active request
+            details: "Client says: 'The stats on page 2 are outdated. Please update with the latest Q4 figures. Also, can we change the main image to something more futuristic?'",
+            requestedDelivery: "2023-12-15 by 5:00 PM",
+            referenceFileNames: ["new_stats_Q4.xlsx", "futuristic_image_concept.jpg"],
+            submittedAt: "2023-12-01T09:15:00Z",
+        }
       },
       { 
         id: 'inno-4', 
@@ -65,6 +73,7 @@ export const mockClientAssets: Record<string, { clientName: string; industry: st
         lastModified: '2023-09-01T00:00:00Z', 
         createdAt: '2023-08-01T00:00:00Z', 
         clientRequestDetails: "Client requests this entire folder of old graphics to be archived or reviewed for deletion as they are no longer relevant.",
+        clientLastRequest: null, // Folders typically don't have direct update requests like files
         children: [
           { 
             id: 'inno-4a', 
@@ -80,8 +89,11 @@ export const mockClientAssets: Record<string, { clientName: string; industry: st
             downloadUrl: '#', 
             createdAt: '2023-08-01T00:00:00Z',
             clientRequestDetails: "This specific graphic is using an old tagline. Please remove or update.",
+            clientLastRequest: null,
           }
       ]},
+       { id: 'inno-5', name: 'Product Launch Video', type: 'video', path: '/Videos/', status: 'completed', needsAttention: false, lastModified: '2023-12-10T10:00:00Z', size: '150 MB', downloadUrl: '#', createdAt: '2023-11-01T00:00:00Z', clientLastRequest: null, },
+       { id: 'inno-6', name: 'Archived Items', type: 'folder', path: '/Archived/', status: 'completed', needsAttention: false, lastModified: '2023-01-01T10:00:00Z', createdAt: '2022-12-01T00:00:00Z', children: [], clientLastRequest: null, },
     ],
   },
   'bk002': {
@@ -90,19 +102,25 @@ export const mockClientAssets: Record<string, { clientName: string; industry: st
     logoUrl: 'https://placehold.co/80x80.png',
     dataAiHint: 'nature logo',
     assets: [
-      { id: 'eco-1', name: 'EcoSolutions Leaf Logo', type: 'image', path: '/Logos/', status: 'completed', needsAttention: false, lastModified: '2023-11-05T10:00:00Z', size: '900 KB', previewUrl: 'https://placehold.co/100x100.png', dataAiHint: 'leaf environment', downloadUrl: '#', createdAt: '2023-02-15T00:00:00Z' },
+      { id: 'eco-1', name: 'EcoSolutions Leaf Logo', type: 'image', path: '/Logos/', status: 'completed', needsAttention: false, lastModified: '2023-11-05T10:00:00Z', size: '900 KB', previewUrl: 'https://placehold.co/100x100.png', dataAiHint: 'leaf environment', downloadUrl: '#', createdAt: '2023-02-15T00:00:00Z', clientLastRequest: null, },
       { 
         id: 'eco-2', 
         name: 'Sustainability Report 2023', 
         type: 'pdf', 
         path: '/Reports/', 
-        status: 'completed', 
+        status: 'waiting', // Changed to waiting to reflect client request
         needsAttention: true, 
         lastModified: '2023-11-20T14:30:00Z', 
         size: '10.2 MB', 
         downloadUrl: '#', 
         createdAt: '2023-02-20T00:00:00Z',
-        clientRequestDetails: "Client found a typo on page 5, paragraph 3. Please correct 'enviromental' to 'environmental'.",
+        clientRequestDetails: "Client found a typo on page 5, paragraph 3. Please correct 'enviromental' to 'environmental'. Also requested a new cover image.",
+        clientLastRequest: {
+            details: "Client found a typo on page 5, paragraph 3. Please correct 'enviromental' to 'environmental'. Also requested a new cover image (see attached concept).",
+            referenceFileNames: ["cover_concept.png"],
+            requestedDelivery: "As soon as possible.",
+            submittedAt: "2023-11-19T10:00:00Z"
+        },
         versions: [
             { id: 'sr-v1', versionNumber: 1, uploadedAt: '2023-11-18T10:00:00Z', uploadedBy: 'Research Team', fileName: 'sustainability_report_2023_draft.pdf', fileSize: '10.1 MB', downloadUrl: '#' },
             { id: 'sr-v2', versionNumber: 2, uploadedAt: '2023-11-20T14:30:00Z', uploadedBy: 'Final Review', fileName: 'sustainability_report_2023_final.pdf', fileSize: '10.2 MB', downloadUrl: '#' }
@@ -116,7 +134,7 @@ export const mockClientAssets: Record<string, { clientName: string; industry: st
     logoUrl: 'https://placehold.co/80x80.png', 
     dataAiHint: 'medical cross', 
     assets: [
-      { id: 'hb-1', name: 'Patient Intake Form', type: 'pdf', path: '/Forms/', status: 'completed', needsAttention: true, lastModified: '2023-11-05T10:00:00Z', size: '900 KB', previewUrl: 'https://placehold.co/100x100.png', dataAiHint: 'form document', downloadUrl: '#', createdAt: '2023-02-15T00:00:00Z', clientRequestDetails: "Needs updated privacy policy section." }
+      { id: 'hb-1', name: 'Patient Intake Form', type: 'pdf', path: '/Forms/', status: 'completed', needsAttention: false, lastModified: '2023-11-05T10:00:00Z', size: '900 KB', previewUrl: 'https://placehold.co/100x100.png', dataAiHint: 'form document', downloadUrl: '#', createdAt: '2023-02-15T00:00:00Z', clientRequestDetails: "Needs updated privacy policy section.", clientLastRequest: null, }
     ] 
   },
   'bk004': { 
@@ -124,14 +142,14 @@ export const mockClientAssets: Record<string, { clientName: string; industry: st
     industry: 'Artificial Intelligence', 
     logoUrl: 'https://placehold.co/80x80.png', 
     dataAiHint: 'abstract brain', 
-    assets: [] 
+    assets: [],
   },
   'bk005': { 
     clientName: 'Artisan Foods Co.', 
     industry: 'Food & Beverage', 
     logoUrl: 'https://placehold.co/80x80.png', 
     dataAiHint: 'wheat grain', 
-    assets: [] 
+    assets: [],
   },
   'bk006': { 
     clientName: 'Globetrotter Agency', 
@@ -139,7 +157,7 @@ export const mockClientAssets: Record<string, { clientName: string; industry: st
     logoUrl: 'https://placehold.co/80x80.png', 
     dataAiHint: 'globe compass', 
     assets: [
-      { id: 'gt-1', name: 'Travel Itinerary Template', type: 'document', path: '/Templates/', status: 'in-progress', needsAttention: true, lastModified: '2023-12-01T09:15:00Z', size: '2.1 MB', downloadUrl: '#', createdAt: '2023-10-01T00:00:00Z', clientRequestDetails: "Add a section for emergency contact information." }
+      { id: 'gt-1', name: 'Travel Itinerary Template', type: 'document', path: '/Templates/', status: 'in-progress', needsAttention: true, lastModified: '2023-12-01T09:15:00Z', size: '2.1 MB', downloadUrl: '#', createdAt: '2023-10-01T00:00:00Z', clientRequestDetails: "Add a section for emergency contact information.", clientLastRequest: null, }
     ]
   },
 };

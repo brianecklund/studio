@@ -1,20 +1,22 @@
 
 'use client';
 
-import type { Asset, AssetStatus } from '@/lib/types';
+import type { Asset, AssetStatus, ClientSubmittedRequest } from '@/lib/types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Folder, FileText, Image as ImageIcon, Video, FileArchive, AlertTriangle, Download, Edit3, ChevronDown, ChevronRight, History } from 'lucide-react';
+import { Folder, FileText, Image as ImageIcon, Video, FileArchive, AlertTriangle, Download, ChevronDown, ChevronRight, History, Send } from 'lucide-react';
 import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { useState, useEffect, type FC } from 'react'; // Added useEffect
-import RequestUpdateForm from './request-update-form'; // Client-side form
+import { useState, useEffect, type FC } from 'react';
+import ClientUpdateRequestModal from './client-update-request-modal';
+import ViewMyRequestModal from './view-my-request-modal';
 import { format } from 'date-fns';
 import { cn } from "@/lib/utils";
 
 interface AssetViewerProps {
   assets: Asset[];
+  onUpdateRequestSubmit: (assetId: string, requestData: ClientSubmittedRequest) => void;
   onAttentionIconClick?: (asset: Asset) => void; // For admin: opens attention details modal
   onViewVersionsClick?: (asset: Asset) => void;  // For admin: opens versions history modal
 }
@@ -24,12 +26,10 @@ const ClientSideFormattedDate: FC<{ dateString: string; formatPattern: string }>
   const [formattedDate, setFormattedDate] = useState<string | null>(null);
 
   useEffect(() => {
-    // This effect runs only on the client, after initial hydration
     setFormattedDate(format(new Date(dateString), formatPattern));
   }, [dateString, formatPattern]);
 
-  // Render a placeholder or null initially, then the formatted date
-  return <>{formattedDate || '...'}</>; // Using '...' as a placeholder
+  return <>{formattedDate || '...'}</>;
 };
 
 
@@ -77,23 +77,37 @@ const AssetIcon = ({ type, isFolder }: { type: Asset['type'], isFolder?: boolean
   }
 };
 
-export default function AssetViewer({ assets, onAttentionIconClick, onViewVersionsClick }: AssetViewerProps) {
+export default function AssetViewer({ assets, onUpdateRequestSubmit, onAttentionIconClick, onViewVersionsClick }: AssetViewerProps) {
   const [expandedFolders, setExpandedFolders] = useState<Record<string, boolean>>({});
+  const [isUpdateRequestModalOpen, setIsUpdateRequestModalOpen] = useState(false);
+  const [isViewMyRequestModalOpen, setIsViewMyRequestModalOpen] = useState(false);
+  const [selectedAssetForRequest, setSelectedAssetForRequest] = useState<Asset | null>(null);
 
   const toggleFolder = (folderId: string) => {
     setExpandedFolders(prev => ({ ...prev, [folderId]: !prev[folderId] }));
+  };
+
+  const handleOpenUpdateRequestModal = (asset: Asset) => {
+    setSelectedAssetForRequest(asset);
+    setIsUpdateRequestModalOpen(true);
+  };
+
+  const handleOpenViewMyRequestModal = (asset: Asset) => {
+    setSelectedAssetForRequest(asset);
+    setIsViewMyRequestModalOpen(true);
   };
 
   const renderAssets = (assetList: Asset[], level = 0) => {
     return assetList.flatMap(asset => {
       const isFolder = asset.type === 'folder';
       const isExpanded = !!expandedFolders[asset.id];
+      const clientRequestActive = asset.clientLastRequest && (asset.status === 'waiting' || asset.status === 'in-progress');
 
       const rows = [(
         <TableRow 
           key={asset.id} 
           className={`
-            ${level > 0 ? 'bg-muted/20 hover:bg-muted/40' : ''} // Removed base hover from top-level rows as parent div has bg-muted
+            ${level > 0 ? 'bg-muted/20 hover:bg-muted/40' : ''}
             ${asset.needsAttention ? 'border-l-2 border-l-destructive' : ''}
           `}
         >
@@ -124,16 +138,20 @@ export default function AssetViewer({ assets, onAttentionIconClick, onViewVersio
           </TableCell>
           <TableCell className="text-center">
             {asset.needsAttention && (
-              onAttentionIconClick ? (
+              onAttentionIconClick ? ( // Admin view
                 <Button variant="ghost" size="icon" className="h-auto p-1 text-destructive hover:text-destructive/80" onClick={() => onAttentionIconClick(asset)} title="View Client Request">
                   <AlertTriangle className="h-5 w-5" />
                 </Button>
-              ) : (
-                <AlertTriangle className="h-5 w-5 text-destructive mx-auto" title="Needs Attention"/>
-              )
+              ) : asset.clientLastRequest ? ( // Client view, request exists
+                <Button variant="ghost" size="icon" className="h-auto p-1 text-destructive hover:text-destructive/80" onClick={() => handleOpenViewMyRequestModal(asset)} title="View Your Request Details">
+                   <AlertTriangle className="h-5 w-5" />
+                </Button>
+              ) : asset.needsAttention ? ( // Client view, general attention (not from their request)
+                 <AlertTriangle className="h-5 w-5 text-destructive mx-auto" title="Needs Attention (Admin flagged)"/>
+              ) : null
             )}
           </TableCell>
-          {onViewVersionsClick && ( // Only show Versions column if callback is provided (admin view)
+          {onViewVersionsClick && (
             <TableCell className="hidden md:table-cell text-xs">
               {!isFolder && asset.versions && asset.versions.length > 0 ? (
                 <Button variant="link" size="sm" className="p-0 h-auto text-xs" onClick={() => onViewVersionsClick(asset)}>
@@ -144,6 +162,23 @@ export default function AssetViewer({ assets, onAttentionIconClick, onViewVersio
               )}
             </TableCell>
           )}
+           {/* Request Column - Client View Only */}
+           {!onAttentionIconClick && !isFolder && (
+            <TableCell>
+              {clientRequestActive ? (
+                <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white text-xs h-8" disabled>
+                  Requested
+                </Button>
+              ) : (
+                <Button variant="outline" size="sm" className="text-xs h-8" onClick={() => handleOpenUpdateRequestModal(asset)}>
+                  <Send className="mr-1.5 h-3.5 w-3.5" /> Request
+                </Button>
+              )}
+            </TableCell>
+          )}
+          {/* Placeholder for Request column in admin view to maintain layout if needed */}
+          {onAttentionIconClick && !isFolder && <TableCell></TableCell>}
+
           <TableCell className="hidden md:table-cell text-muted-foreground text-xs">
             <ClientSideFormattedDate dateString={asset.lastModified} formatPattern="PPp" />
           </TableCell>
@@ -157,13 +192,7 @@ export default function AssetViewer({ assets, onAttentionIconClick, onViewVersio
                   </a>
                 </Button>
               )}
-              {!onAttentionIconClick && !isFolder && ( // Show client-side request update form if not in admin mode
-                 <RequestUpdateForm asset={asset} triggerButton={
-                    <Button variant="outline" size="icon" title="Request update or provide feedback">
-                      <Edit3 className="h-4 w-4" />
-                    </Button>
-                  }/>
-              )}
+              {/* The old Edit3 button for RequestUpdateForm is removed to avoid confusion with the new "Request" button/flow */}
             </div>
           </TableCell>
         </TableRow>
@@ -174,7 +203,7 @@ export default function AssetViewer({ assets, onAttentionIconClick, onViewVersio
       } else if (isFolder && isExpanded && (!asset.children || asset.children.length === 0)) {
         rows.push(
           <TableRow key={`${asset.id}-empty`} className="bg-muted/20 hover:bg-muted/40">
-            <TableCell colSpan={onViewVersionsClick ? 8 : 7} style={{ paddingLeft: `${1 + (level + 1) * 1.5}rem` }} className="text-muted-foreground italic">
+             <TableCell colSpan={onViewVersionsClick ? 9 : (onAttentionIconClick ? 8 : 8)} style={{ paddingLeft: `${1 + (level + 1) * 1.5}rem` }} className="text-muted-foreground italic">
               Folder is empty.
             </TableCell>
           </TableRow>
@@ -187,7 +216,7 @@ export default function AssetViewer({ assets, onAttentionIconClick, onViewVersio
 
   if (!assets || assets.length === 0) {
     return (
-      <Card className="text-center bg-muted"> {/* Added bg-muted here for consistency */}
+      <Card className="text-center bg-muted">
         <CardHeader>
           <CardTitle>No Assets Found</CardTitle>
           <CardDescription>This brand kit is currently empty or assets are still being processed.</CardDescription>
@@ -198,18 +227,22 @@ export default function AssetViewer({ assets, onAttentionIconClick, onViewVersio
       </Card>
     );
   }
+  
+  const numColumns = onViewVersionsClick ? 9 : (onAttentionIconClick ? 8 : 8); // Adjust based on admin/client view
 
   return (
-    <div className="border rounded-lg overflow-hidden bg-muted"> {/* Added bg-muted here */}
+    <div className="border rounded-lg overflow-hidden bg-muted">
       <div className="overflow-x-auto">
         <Table>
-          <TableHeader className="bg-muted/50"> {/* This will be a slightly darker gray on bg-muted */}
+          <TableHeader className="bg-muted/50">
             <TableRow>
               <TableHead className="w-[30%] sm:w-auto">Name</TableHead>
               <TableHead className="hidden sm:table-cell">Type</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-center w-[80px]">Attention</TableHead>
               {onViewVersionsClick && <TableHead className="hidden md:table-cell w-[120px]">Versions</TableHead>}
+              {!onAttentionIconClick && <TableHead className="w-[120px]">Request</TableHead>} 
+              {onAttentionIconClick && <TableHead className="w-[120px] hidden md:table-cell"></TableHead>} {/* Admin view placeholder for request col */}
               <TableHead className="hidden md:table-cell w-[180px]">Last Modified</TableHead>
               <TableHead className="hidden lg:table-cell w-[100px]">Size</TableHead>
               <TableHead className="text-right pr-6 w-[100px]">Actions</TableHead>
@@ -220,6 +253,18 @@ export default function AssetViewer({ assets, onAttentionIconClick, onViewVersio
           </TableBody>
         </Table>
       </div>
+      <ClientUpdateRequestModal
+        asset={selectedAssetForRequest}
+        isOpen={isUpdateRequestModalOpen}
+        onOpenChange={setIsUpdateRequestModalOpen}
+        onUpdateRequestSubmit={onUpdateRequestSubmit}
+      />
+      <ViewMyRequestModal
+        assetName={selectedAssetForRequest?.name || null}
+        request={selectedAssetForRequest?.clientLastRequest || null}
+        isOpen={isViewMyRequestModalOpen}
+        onOpenChange={setIsViewMyRequestModalOpen}
+      />
     </div>
   );
 }
