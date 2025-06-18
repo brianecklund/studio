@@ -6,7 +6,7 @@ import {NextStudio} from 'next-sanity/studio'
 
 // Imports the Sanity config file
 // Corrected path: from src/app/studio/[[...tool]]/page.tsx to root/sanity.config.ts
-import config from '../../../../../sanity.config'
+import config from '../../../../sanity.config'
 
 export default function StudioPage() {
   // Renders the Sanity Studio using the configuration

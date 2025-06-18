@@ -13,7 +13,7 @@ export default function DeprecatedStudioIndexPage() {
 }
 
 // This function is required for dynamic segment pages, 
-// but we return an empty array or a self-consistent param 
+// but we return a self-consistent param 
 // to avoid claiming paths meant for the [[...tool]] route.
 export function generateStaticParams() {
   return [{ index: [] }]; // Matches its own slug name `index`
