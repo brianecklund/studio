@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Folder, FileText, Image as ImageIcon, Video, FileArchive, AlertTriangle, Download, Edit3, ChevronDown, ChevronRight, History } from 'lucide-react';
 import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { useState } from 'react';
+import { useState, useEffect, type FC } from 'react'; // Added useEffect
 import RequestUpdateForm from './request-update-form'; // Client-side form
 import { format } from 'date-fns';
 import { cn } from "@/lib/utils";
@@ -18,6 +18,20 @@ interface AssetViewerProps {
   onAttentionIconClick?: (asset: Asset) => void; // For admin: opens attention details modal
   onViewVersionsClick?: (asset: Asset) => void;  // For admin: opens versions history modal
 }
+
+// Helper component to format date on client-side to avoid hydration mismatch
+const ClientSideFormattedDate: FC<{ dateString: string; formatPattern: string }> = ({ dateString, formatPattern }) => {
+  const [formattedDate, setFormattedDate] = useState<string | null>(null);
+
+  useEffect(() => {
+    // This effect runs only on the client, after initial hydration
+    setFormattedDate(format(new Date(dateString), formatPattern));
+  }, [dateString, formatPattern]);
+
+  // Render a placeholder or null initially, then the formatted date
+  return <>{formattedDate || '...'}</>; // Using '...' as a placeholder
+};
+
 
 const getStatusBadgeVariant = (status: AssetStatus): 'default' | 'secondary' | 'destructive' | 'outline' => {
   switch (status) {
@@ -130,7 +144,9 @@ export default function AssetViewer({ assets, onAttentionIconClick, onViewVersio
               )}
             </TableCell>
           )}
-          <TableCell className="hidden md:table-cell text-muted-foreground text-xs">{format(new Date(asset.lastModified), 'PPp')}</TableCell>
+          <TableCell className="hidden md:table-cell text-muted-foreground text-xs">
+            <ClientSideFormattedDate dateString={asset.lastModified} formatPattern="PPp" />
+          </TableCell>
           <TableCell className="hidden lg:table-cell text-muted-foreground text-xs">{asset.size || (asset.type === 'folder' ? '-' : 'N/A')}</TableCell>
           <TableCell className="text-right">
             <div className="flex gap-1 justify-end">
@@ -182,9 +198,6 @@ export default function AssetViewer({ assets, onAttentionIconClick, onViewVersio
       </Card>
     );
   }
-
-  const colSpanCount = onViewVersionsClick ? 8 : 7;
-
 
   return (
     <div className="border rounded-lg overflow-hidden">
