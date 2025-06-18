@@ -12,11 +12,5 @@ export default function StudioPage() {
   return <NextStudio config={config} />
 }
 
-// This function is used by Next.js to generate static paths if you're using SSG.
-// For the base /studio path, 'tool' would be an empty array.
-export function generateStaticParams() {
-  return [{ tool: [] }]; // Ensures the /studio path itself is generated
-}
-
 // Opt-out of caching for the studio route, ensuring it's always dynamic
 export const dynamic = 'force-dynamic';
