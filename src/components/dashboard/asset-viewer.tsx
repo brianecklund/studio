@@ -93,7 +93,7 @@ export default function AssetViewer({ assets, onAttentionIconClick, onViewVersio
         <TableRow 
           key={asset.id} 
           className={`
-            ${level > 0 ? 'bg-muted/20 hover:bg-muted/40' : 'hover:bg-muted/50'}
+            ${level > 0 ? 'bg-muted/20 hover:bg-muted/40' : ''} // Removed base hover from top-level rows as parent div has bg-muted
             ${asset.needsAttention ? 'border-l-2 border-l-destructive' : ''}
           `}
         >
@@ -187,7 +187,7 @@ export default function AssetViewer({ assets, onAttentionIconClick, onViewVersio
 
   if (!assets || assets.length === 0) {
     return (
-      <Card className="text-center">
+      <Card className="text-center bg-muted"> {/* Added bg-muted here for consistency */}
         <CardHeader>
           <CardTitle>No Assets Found</CardTitle>
           <CardDescription>This brand kit is currently empty or assets are still being processed.</CardDescription>
@@ -200,10 +200,10 @@ export default function AssetViewer({ assets, onAttentionIconClick, onViewVersio
   }
 
   return (
-    <div className="border rounded-lg overflow-hidden">
+    <div className="border rounded-lg overflow-hidden bg-muted"> {/* Added bg-muted here */}
       <div className="overflow-x-auto">
         <Table>
-          <TableHeader className="bg-muted/50">
+          <TableHeader className="bg-muted/50"> {/* This will be a slightly darker gray on bg-muted */}
             <TableRow>
               <TableHead className="w-[30%] sm:w-auto">Name</TableHead>
               <TableHead className="hidden sm:table-cell">Type</TableHead>
